@@ -73,7 +73,7 @@ class Tree:
         maximum = max(node_weight.values())
         for key in node_weight.keys():
             if node_weight[key] == maximum:
-                return key.children
+                return key
 
     def clever_find1(self, request: str) -> Node:
 
@@ -89,7 +89,6 @@ class Tree:
             return max(node_weight.values()) == level
 
         def callback(node: Node):
-            print(node.name)
             global result
             result = copy(node)
 
@@ -111,4 +110,4 @@ if __name__ == "__main__":
                                       '1': {'2': {'3': 'https://habr.com/ru/post/423987/'}}},
                           'Kуртки': {'куртка1': 'https://www.google.ru/'}}})
     print(tr.clever_find1('крутк'))
-    print(tr.clever_find('крутк'))
+    print(tr.clever_find('корен'))
