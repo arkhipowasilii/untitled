@@ -1,7 +1,7 @@
-from typing import Callable
+from typing import Callable, List
 
 from tree_structure import Node
-
+from copy import copy
 
 class Tree:
     def __init__(self, tree_dict: dict):
@@ -50,6 +50,9 @@ class Tree:
             if node.__str__() == name:
                 return uid
 
+    def all_uids(self):
+        return [node.uid() for node in self._nodes.values()]
+
     def find_parent(self, uid: int) -> int:
         uid1 = None
         for node in self._nodes.values():
@@ -59,5 +62,53 @@ class Tree:
             return -1
         return uid1
 
-    def traversal(self, callback: Callable[[Node], None]) -> Node:
-        pass
+    def get_nodes_weight(self, request: str):
+        result = dict()
+        for node in self._nodes.values():
+            result[node] = _intersection(node, request)
+        return result
+
+    def clever_find(self, request: str) -> Node:
+        node_weight = self.get_nodes_weight(request)
+        maximum = max(node_weight.values())
+        for key in node_weight.keys():
+            if node_weight[key] == maximum:
+                return key.children
+
+    def clever_find1(self, request: str) -> Node:
+
+        node_weight = self.get_nodes_weight(request)
+        result = None
+
+        def filter_(node: Node):
+            level = node_weight[node]
+
+            if level == 0:
+                return False
+
+            return max(node_weight.values()) == level
+
+        def callback(node: Node):
+            print(node.name)
+            global result
+            result = copy(node)
+
+        self.root.traversal(filter_, callback)
+
+        return result
+
+
+def _intersection(node: Node, request: str) -> int:
+    return len(set(node.name).intersection(request))
+
+
+def return_node(node: Node) -> Node:
+    return node
+
+
+if __name__ == "__main__":
+    tr = Tree({'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/",
+                                      '1': {'2': {'3': 'https://habr.com/ru/post/423987/'}}},
+                          'Kуртки': {'куртка1': 'https://www.google.ru/'}}})
+    print(tr.clever_find1('крутк'))
+    print(tr.clever_find('крутк'))

@@ -61,4 +61,5 @@ class MyBot:
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     MyBot("701721190:AAEtlb05Fbi7VO9jRaOd6TARNv-kYhQj-ys",
-          {'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/"}, 'Kуртки': {'куртка1': 'https://habr.com/ru/post/423987/'}}}).start_bot()
+          {'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/",
+                                  '1':{'2':{'3':'https://habr.com/ru/post/423987/'}}}, 'Kуртки': {'куртка1': 'https://www.google.ru/'}}}).start_bot()

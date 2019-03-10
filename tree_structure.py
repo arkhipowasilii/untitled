@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Callable
 
 
 class Node:
@@ -14,7 +14,7 @@ class Node:
         if children:
             assert all(isinstance(child, Node) for child in children)
             self.children = list(children)
-    
+
     @property
     def uid(self) -> int:
         return self._uid
@@ -47,4 +47,10 @@ class Node:
                 return result
         
         return None
+
+    def traversal(self, filter_: Callable[['Node'], bool], callback: Callable[['Node'], None]):
+        if filter_(self):
+             callback(self)
+        for child in self.children:
+            child.traversal(filter_, callback)
 
