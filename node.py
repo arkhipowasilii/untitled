@@ -19,11 +19,18 @@ class Node:
     def uid(self) -> int:
         return self._uid
 
+    @property
+    def is_leaf(self) -> bool:
+        return len(self.children) == 0
+
     def __repr__(self):
         return f"{self._uid}::{self.name}::{self.url}::{','.join(tuple(str(child.uid) for child in self.children))}"
 
     def __str__(self):
         return self.name
+
+    def __hash__(self):
+        return self.uid.__hash__()
 
     def add_child(self, node: 'Node'):
         assert isinstance(node, Node)
@@ -48,9 +55,13 @@ class Node:
         
         return None
 
-    def traversal(self, filter_: Callable[['Node'], bool], callback: Callable[['Node'], None]):
-        if filter_(self):
-             callback(self)
+    def traversal(self, filter_: Callable[['Node'], bool], callback: Callable[['Node'], Optional[bool]]):
+        if filter_(self) is False:
+            return
+
+        if callback(self) is False:
+            return
+
         for child in self.children:
             child.traversal(filter_, callback)
 

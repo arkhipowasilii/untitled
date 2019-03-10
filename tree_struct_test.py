@@ -1,7 +1,7 @@
 import pytest
 
 from tree import Tree
-from tree_structure import Node
+from node import Node
 
 
 def test_tree():

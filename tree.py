@@ -1,7 +1,7 @@
-from typing import Callable, List
+from typing import Tuple, Union
 
-from tree_structure import Node
-from copy import copy
+from node import Node
+
 
 class Tree:
     def __init__(self, tree_dict: dict):
@@ -13,12 +13,9 @@ class Tree:
         self._nodes = dict()
 
         self.add_uid(self.root)
-        self.add(self.root, tree_dict[key])
 
-        #def func(node):
-        #    self._nodes[node.uid] = node
-        #
-        #self.traversal(func)
+        # ToDo 3 Add sorting of data by lexicographical for children layer
+        self.add(self.root, tree_dict[key])
 
     def add_uid(self, node: Node):
         self._nodes[node.uid] = node
@@ -39,7 +36,7 @@ class Tree:
             else:
                 raise ValueError(f"{value}")
     
-    def find(self, name: str):
+    def find1(self, name: str):
         return self.root.find(name)
     
     def get(self, uid: int) -> Node:
@@ -50,7 +47,7 @@ class Tree:
             if node.__str__() == name:
                 return uid
 
-    def all_uids(self):
+    def all_uid(self):
         return [node.uid() for node in self._nodes.values()]
 
     def find_parent(self, uid: int) -> int:
@@ -62,48 +59,54 @@ class Tree:
             return -1
         return uid1
 
-    def get_nodes_weight(self, request: str):
-        result = dict()
-        for node in self._nodes.values():
-            result[node] = _intersection(node, request)
-        return result
+    def find(self, request: str) -> Union[Node, Tuple[Node], None]:
+        paths = self._find(self.root, request)
+        if len(paths) == 1:
+            return paths[0]
+        elif len(paths) == 0:
+            return None
+        else:
+            return paths
 
-    def clever_find(self, request: str) -> Node:
-        node_weight = self.get_nodes_weight(request)
-        maximum = max(node_weight.values())
-        for key in node_weight.keys():
-            if node_weight[key] == maximum:
-                return key
+    def _find(self, node: Node, request: str) -> Tuple[Node]:
 
-    def clever_find1(self, request: str) -> Node:
+        if len(request) == 0:
+            return node,
 
-        node_weight = self.get_nodes_weight(request)
-        result = None
+        if node.is_leaf:
+            return node,
 
-        def filter_(node: Node):
-            level = node_weight[node]
+        node_weights = {child: len(_get_intersection(child, request))
+                            for child in node.children}
 
-            if level == 0:
-                return False
+        max_weight = max(node_weights.values())
 
-            return max(node_weight.values()) == level
+        nodes = tuple(node for node, weight in node_weights.items()
+                                        if weight == max_weight)
 
-        def callback(node: Node):
-            global result
-            result = copy(node)
+        paths: Tuple[Tuple[Node]] = tuple(self._find(node, _get_difference(node, request)) for node in nodes)
+        # ToDo If we haven't got correct (with `len() == 1`) paths, we must return path with max relevant
+        return tuple(path[0] for path in paths if len(path) == 1)
 
-        self.root.traversal(filter_, callback)
+def _get_difference(node: Node, request: str) -> str:
+    '''
 
-        return result
+    :param node:
+    :param request:
+    :return: Return `request \ node.data`
+    '''
+    # ToDo 1 Normal difference (spell-mistake delta 2)
+    pass
 
+def _get_intersection(node: Node, request: str) -> str:
+    '''
 
-def _intersection(node: Node, request: str) -> int:
-    return len(set(node.name).intersection(request))
-
-
-def return_node(node: Node) -> Node:
-    return node
-
+    :param node:
+    :param request:
+    :return:
+    '''
+    # ToDo 2 Normal intersection
+    pass
 
 if __name__ == "__main__":
     tr = Tree({'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/",

@@ -3,7 +3,7 @@ import logging
 from telegram import Update, Bot, InlineKeyboardButton as Button, InlineKeyboardMarkup as Markup
 from telegram.ext import CommandHandler, Updater, MessageHandler, filters, InlineQueryHandler, CallbackQueryHandler
 from typing import Tuple, Dict, Any, List
-from tree_structure import Node
+from node import Node
 from functools import reduce
 from tree import Tree
 
@@ -59,6 +59,9 @@ class MyBot:
 
 
 if __name__ == '__main__':
+
+    # ToDo 4 Move data to json
+
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     MyBot("701721190:AAEtlb05Fbi7VO9jRaOd6TARNv-kYhQj-ys",
           {'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/",
