@@ -6,6 +6,7 @@ from typing import Tuple, Dict, Any, List
 from node import Node
 from functools import reduce
 from tree import Tree
+import json
 
 # ToDo
 # 1. По команде `/start` бот присылает сообщение, где кнопки представлены в виде директорий.
@@ -61,8 +62,9 @@ class MyBot:
 if __name__ == '__main__':
 
     # ToDo 4 Move data to json
+    with open("menu.json", "r") as write_file:
+        menu_dict = json.load(write_file)
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     MyBot("701721190:AAEtlb05Fbi7VO9jRaOd6TARNv-kYhQj-ys",
-          {'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/",
-                                  '1':{'2':{'3':'https://habr.com/ru/post/423987/'}}}, 'Kуртки': {'куртка1': 'https://www.google.ru/'}}}).start_bot()
+          menu_dict).start_bot()
