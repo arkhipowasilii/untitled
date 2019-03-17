@@ -61,8 +61,7 @@ class MyBot:
 
 if __name__ == '__main__':
 
-    # ToDo 4 Move data to json
-    with open("menu.json", "r") as write_file:
+    with open("menu.json", "r", encoding="utf-8") as write_file:
         menu_dict = json.load(write_file)
 
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)

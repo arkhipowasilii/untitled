@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 from node import Node
+from functools import reduce
 
 
 class Tree:
@@ -21,6 +22,7 @@ class Tree:
         self._nodes[node.uid] = node
 
     def add(self, node: Node, raw_data: dict):
+
         for key, value in raw_data.items():
             if isinstance(value, str):
                 new_node = Node(name=key, url=value)
@@ -85,8 +87,14 @@ class Tree:
                                         if weight == max_weight)
 
         paths: Tuple[Tuple[Node]] = tuple(self._find(node, _get_difference(node, request)) for node in nodes)
+        print(paths)
+        print(request)
         # ToDo If we haven't got correct (with `len() == 1`) paths, we must return path with max relevant
-        return tuple(path[0] for path in paths if len(path) == 1)
+        if len(paths) ==1:
+            return tuple(path[0] for path in paths if len(path) == 1)
+        else:
+            return paths[1]
+
 
 def _get_difference(node: Node, request: str) -> str:
     '''
@@ -96,7 +104,17 @@ def _get_difference(node: Node, request: str) -> str:
     :return: Return `request \ node.data`
     '''
     # ToDo 1 Normal difference (spell-mistake delta 2)
-    pass
+    node_name = set(node.__str__())
+    result_dict = dict()
+    for word_req in request.split(' '):
+        difference = node_name.intersection(set(word_req))
+        if len(difference) >= len(node_name) - 2:
+            result_dict[len(difference)] = word_req
+    if len(result_dict) == 0:
+        return request
+    max = reduce(lambda a, b: a if (a > b) else b, result_dict.keys())
+    return request.replace(result_dict[max], '').replace('  ', ' ')
+
 
 def _get_intersection(node: Node, request: str) -> str:
     '''
@@ -106,11 +124,16 @@ def _get_intersection(node: Node, request: str) -> str:
     :return:
     '''
     # ToDo 2 Normal intersection
-    pass
+    node_name = set(node.__str__())
+    result_dict = dict()
+    for word_req in request.split(' '):
+        intersection = node_name.intersection(set(word_req))
+        result_dict[len(intersection)] = intersection
+    max = reduce(lambda a, b: a if (a>b) else b, result_dict.keys())
+    return result_dict[max]
+
 
 if __name__ == "__main__":
-    tr = Tree({'Корень': {'Зонтики': {"Зонтик 1": "https://www.google.ru/", "Зонтик2": "https://yandex.ru/",
-                                      '1': {'2': {'3': 'https://habr.com/ru/post/423987/'}}},
+    tr = Tree({'Корень': {'Зонтики': {"Зонтик1": "https://www.google.ru/",'1': {'2': {'3': 'https://habr.com/ru/post/423987/'}}, "Зонтик2": "https://yandex.ru/"},
                           'Kуртки': {'куртка1': 'https://www.google.ru/'}}})
-    print(tr.clever_find1('крутк'))
-    print(tr.clever_find('корен'))
+    print(tr.find('Зонтик1 p'), '<-- res')
