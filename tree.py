@@ -1,16 +1,14 @@
 from typing import Tuple, Union
 
 from node import Node
-from functools import reduce
-
 
 class Tree:
     def __init__(self, tree_dict: dict):
         assert len(tree_dict.keys()) == 1
         key = tuple(tree_dict.keys())[0]
-        
+
         self.root = Node(name=key)
-        
+
         self._nodes = dict()
 
         self.add_uid(self.root)
@@ -37,10 +35,10 @@ class Tree:
 
             else:
                 raise ValueError(f"{value}")
-    
+
     def find1(self, name: str):
         return self.root.find(name)
-    
+
     def get(self, uid: int) -> Node:
         return self._nodes[uid]
 
@@ -78,62 +76,78 @@ class Tree:
         if node.is_leaf:
             return node,
 
-        node_weights = {child: len(_get_intersection(child, request))
-                            for child in node.children}
+        node_weights = ((child, _get_intersection(child, request)) for child in node.children)
 
-        max_weight = max(node_weights.values())
+        nodes: Tuple[Tuple[Node, str]] = sorted(node_weights, key=lambda pair: len(pair[1]))
 
-        nodes = tuple(node for node, weight in node_weights.items()
-                                        if weight == max_weight)
+        paths: Tuple[Tuple[Node]] = (self._find(node, _get_difference(request, intersection))
+                                                                for node, intersection in nodes)
 
-        paths: Tuple[Tuple[Node]] = tuple(self._find(node, _get_difference(node, request)) for node in nodes)
-        print(paths)
-        print(request)
-        # ToDo If we haven't got correct (with `len() == 1`) paths, we must return path with max relevant
-        if len(paths) ==1:
-            return tuple(path[0] for path in paths if len(path) == 1)
-        else:
-            return paths[1]
+        # ToDo add return with use generator logic
+        result = []
 
+        for path in paths:
+            pass
 
-def _get_difference(node: Node, request: str) -> str:
+        return result
+
+def _get_difference(request: str, data: Union[Node, str]) -> str:
     '''
 
-    :param node:
     :param request:
-    :return: Return `request \ node.data`
+    :param data:
+    :return:
     '''
-    # ToDo 1 Normal difference (spell-mistake delta 2)
-    node_name = set(node.__str__())
-    result_dict = dict()
-    for word_req in request.split(' '):
-        difference = node_name.intersection(set(word_req))
-        if len(difference) >= len(node_name) - 2:
-            result_dict[len(difference)] = word_req
-    if len(result_dict) == 0:
-        return request
-    max = reduce(lambda a, b: a if (a > b) else b, result_dict.keys())
-    return request.replace(result_dict[max], '').replace('  ', ' ')
+    intersection = _get_intersection(str(data), request)
+    return " ".join(list(filter(lambda word: _distance(intersection, word) > 2, request.split(' '))))
 
-
-def _get_intersection(node: Node, request: str) -> str:
+def _distance(left_word:str, right_word:str) -> int:
     '''
 
-    :param node:
+    :param left_word:
+    :param right_word:
+    :return:
+    '''
+    # ToDo Изучить Рас-е Левенштейна и отрефакторить данную функцию и объяснить мне её
+
+    len_left, len_right = len(left_word), len(right_word)
+    if len_left > len_right:
+        left_word, right_word = right_word, left_word
+        len_left, len_right = len_right, len_left
+
+    current_row = range(len_left+1) # Keep current and previous row, not entire matrix
+    for index in range(1, len_right+1):
+
+        previous_row, current_row = current_row, [index]+[0] * len_left
+        for inner_index in range(1,len_left+1):
+            add, delete, change = previous_row[inner_index]+1, current_row[inner_index-1]+1, previous_row[inner_index-1]
+
+            if left_word[inner_index - 1] != right_word[index - 1]:
+                change += 1
+
+            current_row[inner_index] = min(add, delete, change)
+
+    return current_row[len_left]
+
+def _get_intersection(data: Union[Node, str], request: str) -> str:
+    '''
+
+    :param data:
     :param request:
     :return:
     '''
     # ToDo 2 Normal intersection
-    node_name = set(node.__str__())
-    result_dict = dict()
-    for word_req in request.split(' '):
-        intersection = node_name.intersection(set(word_req))
-        result_dict[len(intersection)] = intersection
-    max = reduce(lambda a, b: a if (a>b) else b, result_dict.keys())
-    return result_dict[max]
+    data = str(data)
+    word, distance = "", None
 
+    for request_word in request.split(' '):
+        request_distance = _distance(data, request_word)
 
-if __name__ == "__main__":
-    tr = Tree({'Корень': {'Зонтики': {"Зонтик1": "https://www.google.ru/",'1': {'2': {'3': 'https://habr.com/ru/post/423987/'}}, "Зонтик2": "https://yandex.ru/"},
-                          'Kуртки': {'куртка1': 'https://www.google.ru/'}}})
-    print(tr.find('Зонтик1 p'), '<-- res')
+        if request_distance > 2:
+            continue
+
+        if distance is None or request_distance < distance:
+            word, distance = data, request_distance
+
+    return word
+
