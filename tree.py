@@ -4,6 +4,8 @@ import json
 from node import Node
 
 
+# ToDo Homework make tests for `Tree` class.
+
 class Tree:
     def __init__(self, tree_dict: dict):
         assert len(tree_dict.keys()) == 1
@@ -37,9 +39,6 @@ class Tree:
             else:
                 raise ValueError(f"{value}")
 
-    def find1(self, name: str):
-        return self.root.find(name)
-
     def get(self, uid: int) -> Node:
         return self._nodes[uid]
 
@@ -61,17 +60,15 @@ class Tree:
         return uid1
 
     def find(self, request: str) -> Union[Node, Tuple[Node], None]:
-        global result_paths
-        result_paths = list()
         paths = self._find(self.root, request)
-        if len(paths) == 1:
-            return paths[0]
-        elif len(paths) == 0:
-            return None
-        else:
-            return paths
 
-    def _find(self, node: Node, request: str) -> Tuple[Node]:
+        if any(weight == 0 for weight, _ in paths):
+            return paths[-1][1]
+
+        path = min(paths, key=lambda weight_path: weight_path[0])
+        return path[-1][1]
+
+    def _find(self, node: Node, request: str, weight: int = None) -> List[Tuple[int, Node]]:
         """
         Возвращает узел, если поиск успешен
         Возвращает все не отверженные пути, если поиск не успешен и взвешивает их
@@ -79,47 +76,55 @@ class Tree:
         :param request:
         :return:
         """
+
+        weight = weight or 0
+
         if len(request) == 0:
-            return node,
+            return [(0, node), ]
 
         if node.is_leaf:
-            return node,
+            # ToDo Add request
+            return [(len(request.split(' ')), node), ]
 
-        node_weights: Tuple[Tuple[Node, str]] = tuple((child, _get_intersection(child, request))
-                                                      for child in node.children)
+        node_weights: Tuple[Tuple[Node, dict]] = tuple((child, _get_difference_point(child, request))
+                                                       for child in node.children)
+
         logging.debug(f"node_weights --> {node_weights}")
-        nodes: Tuple[Tuple[Node, str]] = sorted(node_weights, key=lambda pair: len(pair[1]))
-        print(f"nodes --> {nodes}")
 
-        def _find_path(child, intersection):
-            return child, self._find(child, _get_difference(request, intersection))
+        nodes: Tuple[Tuple[Node, dict]] = sorted(node_weights,
+                                                 key=lambda node_data: node_data[1]['distance'])
 
-        paths: List[float, Tuple[Node]] = list()
-        for child, path in map(_find_path, nodes):
-            if len(path) == 1:
-                return path
+        logging.debug(f"nodes --> {nodes}")
 
-            weight = None  # TODO HERE
+        def _find_path(child: Node, intersection: str, weight_child: int) -> tuple:
+            return child, \
+                   self._find(child, _get_difference(request, intersection), weight + weight_child)
 
-            path = list(path)
-            path.append(child)
+        current_paths = []
+        for child, paths in (_find_path(node, data['word'], data['distance']) for node, data in nodes):
+            for path_weight, path in paths:
+                if len(path) != 1:
+                    path.append(child)
 
-            paths.append((weight, path))
+                current_paths.append((path_weight, path))
 
-        return paths
+        if any(pair[0] == 0 for pair in current_paths):
+            current_paths = list(filter(lambda pair: pair[0] == 0, current_paths))
+
+        return current_paths
 
 
 def _get_difference(request: str, data: Union[Node, str]) -> str:
-    '''
+    """
 
     :param request:
     :param data:
     :return:
-    '''
-    return " ".join(list(filter(lambda word: _distance(str(data), word) > 2, request.split(' '))))
+    """
+    return " ".join(list(filter(lambda word: distance(str(data), word) > 2, request.split(' '))))
 
 
-def _distance(left_word: str, right_word: str) -> int:
+def distance(left_word: str, right_word: str) -> int:
     '''
 
     :param left_word:
@@ -129,19 +134,22 @@ def _distance(left_word: str, right_word: str) -> int:
     # ToDo Протестировать функцию
     # ToDo_less Разобрать док-о алгоритма
 
+    assert left_word.find(' ') == -1
+    assert right_word.find(' ') == -1
+
     len_left, len_right = len(left_word), len(right_word)
+
+    if len_right == 0 or len_left == 0:
+        return len_right + len_left
 
     if len_left > len_right:
         left_word, right_word = right_word, left_word
         len_left, len_right = len_right, len_left
 
-    assert left_word.find(' ') == -1
-    assert right_word.find(' ') == -1
+    _matrix: List[List[Optional[int]]] = list(list(0 for _ in range(len_left)) for _ in range(len_right))
 
-    _matrix: List[List[Optional[int]]] = list(list(None for _ in range(len_left)) for _ in range(len_right))
-
-    for right_index, right_char in enumerate(right_word):
-        for left_index, left_char in enumerate(left_word):
+    for right_index in range(len_right):
+        for left_index in range(len_left):
 
             if right_index == 0:
                 _matrix[0][left_index] = left_index
@@ -149,19 +157,17 @@ def _distance(left_word: str, right_word: str) -> int:
             if left_index == 0:
                 _matrix[right_index][0] = right_index
 
-            add = _matrix[right_index][left_index - 1]
-            delete = _matrix[right_index - 1][left_index]
+            add = _matrix[right_index][left_index - 1] + 1
+            delete = _matrix[right_index - 1][left_index] + 1
             change = _matrix[right_index - 1][left_index - 1]
-
             if right_word[right_index] != left_word[left_index]:
                 change += 1
 
-            _matrix[left_index][right_index] = min(add, delete, change)
-
+                _matrix[right_index][left_index] = min(add, delete, change)
     return _matrix[-1][-1]
 
 
-def _get_intersection(data: Union[Node, str], request: str) -> set:
+def _get_difference_point(data: Union[Node, str], request: str) -> Dict[str, Union[str, int]]:
     '''
 
     :param data:
@@ -170,14 +176,29 @@ def _get_intersection(data: Union[Node, str], request: str) -> set:
     '''
     # ToDo 2 Normal intersection
     data = str(data)
-    minimum_inter = len(data)
+    min_dis, result = len(data)
 
     for request_word in request.split(' '):
-        request_distance = _distance(request_word, data)
-        if request_distance < minimum_inter:
-            minimum_inter = request_distance
+        request_distance = distance(request_word, data)
+        if request_distance < min_dis:
+            min_dis, result = request_distance, request_word
 
-    return minimum_inter
+    return {"word": result, "distance": min_dis}
+
+
+def _get_intersection(right_word: str, left_word: str):
+    len_left, len_right = len(left_word), len(right_word)
+    if len_left > len_right:
+        left_word, right_word = right_word, left_word
+        len_left, len_right = len_right, len_left
+    if left_word in right_word:
+        return left_word
+    for index in range(len_left):
+        for index2 in range(len_left - (len_left - index) + 1):
+            left_slice = left_word[index2:: (len_left - index)]
+            logging.debug(f"left_slice --> {left_slice}")
+            if left_slice in right_word:
+                return left_slice
 
 
 if __name__ == '__main__':
@@ -185,7 +206,5 @@ if __name__ == '__main__':
 
     with open("menu.json", "r", encoding="utf-8") as write_file:
         menu_dict = json.load(write_file)
-
-    ex_tree = Tree(menu_dict)
-    print(_get_difference("Зоктики", "зонтики"))
-    print(ex_tree.find("зззззз2"))
+    print(_get_intersection("abcbsjh", "qqabcx"))
+    example_tree = Tree(menu_dict)
