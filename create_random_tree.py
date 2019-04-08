@@ -1,4 +1,5 @@
 import random
+import logging
 import string
 
 
@@ -13,9 +14,16 @@ def get_random_level() -> int:
 def generate_random_key_dict() -> dict:
     return {get_random_string(): {} for _ in range(get_random_level())}
 
+
 def recursion_dict(example_dict: dict, level: int = None, max_level: int = None):
-    for keys, values in example_dict.items():
-        values
+    if len(example_dict) == 0:
+        example_dict = generate_random_key_dict()
+    for key, value in example_dict.items():
+        if level == max_level:
+            example_dict[key] = get_random_string()
+        else:
+            example_dict[key] = recursion_dict(value, (level + 1), max_level)
+    return example_dict
 
 # ToDo
 
@@ -24,9 +32,10 @@ def recursion_dict(example_dict: dict, level: int = None, max_level: int = None)
 # 3. Путь из предыдущего пункта - передаешь функции find и сравниваешь результат
 # 4*. Берешь несколько путей (как в пункте 2), произвольном порядке их смешиваешь и передаешь функции find
 
+
 if __name__ == '__main__':
-    tree = {"root": {}}
-    level = tree['root']
-    random_level = get_random_level()
-    for num in range(random_level):
-        recursion_dict(tree, num, random_level)
+    logging.basicConfig(level=logging.DEBUG)
+tree = {"root": {}}
+level = tree['root']
+
+print(recursion_dict(tree, 0, 2))
