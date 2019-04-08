@@ -206,5 +206,5 @@ if __name__ == '__main__':
 
     with open("menu.json", "r", encoding="utf-8") as write_file:
         menu_dict = json.load(write_file)
-    print(_get_intersection("abcbsjh", "qqabcx"))
     example_tree = Tree(menu_dict)
+    print(example_tree.find("Зонтики"))

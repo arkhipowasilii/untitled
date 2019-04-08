@@ -1,5 +1,4 @@
 import random
-import logging
 import string
 
 
@@ -25,6 +24,11 @@ def recursion_dict(example_dict: dict, level: int = None, max_level: int = None)
             example_dict[key] = recursion_dict(value, (level + 1), max_level)
     return example_dict
 
+
+def get_random_dict(max_level):
+    tree = {"root": {}}
+    return recursion_dict(tree, 0, max_level-1)
+
 # ToDo
 
 # 1. Генерировать произвольное дерево
@@ -34,8 +38,5 @@ def recursion_dict(example_dict: dict, level: int = None, max_level: int = None)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-tree = {"root": {}}
-level = tree['root']
+    print(get_random_dict(2))
 
-print(recursion_dict(tree, 0, 2))
