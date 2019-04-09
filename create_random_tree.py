@@ -14,15 +14,17 @@ def generate_random_key_dict() -> dict:
     return {get_random_string(): {} for _ in range(get_random_level())}
 
 
-def recursion_dict(example_dict: dict, level: int = None, max_level: int = None):
-    if len(example_dict) == 0:
-        example_dict = generate_random_key_dict()
-    for key, value in example_dict.items():
+def recursion_dict(root_dict: dict, level: int = None, max_level: int = None):
+    if len(root_dict) == 0:
+        root_dict = generate_random_key_dict()
+
+    for key, value in root_dict.items():
         if level == max_level:
-            example_dict[key] = get_random_string()
+            root_dict[key] = get_random_string()
         else:
-            example_dict[key] = recursion_dict(value, (level + 1), max_level)
-    return example_dict
+            root_dict[key] = recursion_dict(value, (level + 1), max_level)
+
+    return root_dict
 
 
 def get_random_dict(max_level):
@@ -38,5 +40,5 @@ def get_random_dict(max_level):
 
 
 if __name__ == '__main__':
-    print(get_random_dict(2))
+    print(get_random_dict(10))
 
