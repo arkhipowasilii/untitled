@@ -132,7 +132,6 @@ def distance(left_word: str, right_word: str) -> int:
     :return:
     '''
     # ToDo Протестировать функцию
-    # ToDo_less Разобрать док-о алгоритма
 
     assert left_word.find(' ') == -1
     assert right_word.find(' ') == -1
