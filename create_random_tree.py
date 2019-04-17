@@ -3,11 +3,11 @@ import string
 
 
 def get_random_string() -> str:
-    return ''.join(random.choices(string.ascii_letters, k=random.randint(2, 8)))
+    return ''.join(random.choices(string.ascii_letters, k=random.randint(2, 5)))
 
 
 def get_random_level() -> int:
-    return random.randint(2, 10)
+    return random.randint(2, 3)
 
 
 def generate_random_key_dict() -> dict:
