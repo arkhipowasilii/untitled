@@ -30,15 +30,3 @@ def recursion_dict(root_dict: dict, level: int = None, max_level: int = None):
 def get_random_dict(max_level):
     tree = {"root": {}}
     return recursion_dict(tree, 0, max_level-1)
-
-# ToDo
-
-# 1. Генерировать произвольное дерево
-# 2. Уметь обходить дерево рандомно сохраняя data -> делаешь из этого request (можно перемешать)
-# 3. Путь из предыдущего пункта - передаешь функции find и сравниваешь результат
-# 4*. Берешь несколько путей (как в пункте 2), произвольном порядке их смешиваешь и передаешь функции find
-
-
-if __name__ == '__main__':
-    print(get_random_dict(10))
-

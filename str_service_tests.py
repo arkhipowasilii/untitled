@@ -5,8 +5,10 @@ from str_service import get_distance
 
 
 def test_distance_rnd():
-    count = 10000
+    current_file = open("str_service_tests.py", "a")
+    current_file.write("\n")
 
+    count = 100000
     while count != 0:
         count -= 1
 
@@ -17,21 +19,18 @@ def test_distance_rnd():
         # Add assert with intersect of `set(word)`
         # Нет четких условий, есть только граничные
 
-        intersection_len = len(set(word1).intersection(word2))
+        intersection = set(word1).intersection(word2)
 
         try:
-            assert abs(len(word1)-len(word2)) < distance, f"{word1} : {word2} -> {get_distance}"
-            # assert
+            assert abs(len(word1)-len(word2)) <= distance, f"{word1} : {word2} -> {get_distance}"
+            assert len(intersection) <= distance
             # assert
             # assert
         except AssertionError as error:
+            current_file.write(f"assert get_distance('{word1}', '{word2}') == \n")
             # ToDo auto generate test with word1 and word2 and append it in this file auto
-            raise error
 
         # assert True, f"{word1} : {word2} -> {get_distance}"
-
-
-    pass
 
 
 def test_distance_few_len():

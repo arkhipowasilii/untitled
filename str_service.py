@@ -24,7 +24,6 @@ def get_distance(left_word: str, right_word: str) -> int:
     # ToDo Протестировать функцию
     # FixMe ТУТ ЕСТЬ ОШИБКИ
     # FixMe ИХ НАДО ИСПРАВИТЬ
-    # ToDo Разобрать док-о алгоритма
 
     assert left_word.find(' ') == -1
     assert right_word.find(' ') == -1
@@ -38,23 +37,21 @@ def get_distance(left_word: str, right_word: str) -> int:
         left_word, right_word = right_word, left_word
         len_left, len_right = len_right, len_left
 
-    _matrix: List[List[Optional[int]]] = list(list(0 for _ in range(len_left)) for _ in range(len_right))
+    _matrix: List[List[Optional[int]]] = list(list(0 for _ in range(len_left+1)) for _ in range(len_right+1))
 
-    for right_index in range(len_right):
-        for left_index in range(len_left):
+    for right_index in range(1, len_right+1):
+        for left_index in range(1, len_left+1):
 
-            if right_index == 0:
+            if right_index == 1:
                 _matrix[0][left_index] = left_index
-                continue
 
-            if left_index == 0:
+            if left_index == 1:
                 _matrix[right_index][0] = right_index
-                continue
 
-            add = _matrix[right_index][left_index - 1]
-            delete = _matrix[right_index - 1][left_index]
+            add = _matrix[right_index][left_index - 1]+1
+            delete = _matrix[right_index - 1][left_index]+1
             change = _matrix[right_index - 1][left_index - 1]
-            if right_word[right_index] != left_word[left_index]:
+            if right_word[right_index-1] != left_word[left_index-1]:
                 change += 1
 
             _matrix[right_index][left_index] = min(add, delete, change)
@@ -94,3 +91,7 @@ def _get_intersection(right_word: str, left_word: str):
             logging.debug(f"left_slice --> {left_slice}")
             if left_slice in right_word:
                 return left_slice
+
+
+if __name__ == '__main__':
+    print(get_distance('KlrxT', 'KlgtT'))
