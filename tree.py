@@ -72,6 +72,7 @@ class Tree:
 
     def _find(self, node: Node, request: str, weight: int = None) -> List[Tuple[int, Node]]:
         """
+        TODO FIXME
         Возвращает узел, если поиск успешен
         Возвращает все не отверженные пути, если поиск не успешен и взвешивает их
         :param node:
@@ -121,5 +122,6 @@ if __name__ == '__main__':
 
     with open("menu.json", "r", encoding="utf-8") as write_file:
         menu_dict = json.load(write_file)
+
     example_tree = Tree(menu_dict)
     print(example_tree.find("Зонтики"))

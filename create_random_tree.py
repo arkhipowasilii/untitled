@@ -7,7 +7,7 @@ def get_random_string() -> str:
 
 
 def get_random_level() -> int:
-    return random.randint(2, 3)
+    return random.randint(2, 10)
 
 
 def generate_random_key_dict() -> dict:
@@ -30,3 +30,9 @@ def recursion_dict(root_dict: dict, level: int = None, max_level: int = None):
 def get_random_dict(max_level):
     tree = {"root": {}}
     return recursion_dict(tree, 0, max_level-1)
+
+if __name__ == '__main__':
+    rnd_dict = get_random_dict(5)
+    import json
+    with open("menu.json", 'w') as fp:
+        json.dump(fp=fp, obj=rnd_dict)

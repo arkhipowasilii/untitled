@@ -1,9 +1,8 @@
 from tree import Tree
 from str_service import get_distance
 from node import Node
-from typing import Tuple, List
-from random import randint, shuffle
-import pytest
+from typing import List
+from random import shuffle
 import random
 from create_random_tree import get_random_dict
 
