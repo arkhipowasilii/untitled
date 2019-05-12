@@ -31,6 +31,7 @@ def get_random_dict(max_level):
     tree = {"root": {}}
     return recursion_dict(tree, 0, max_level-1)
 
+
 if __name__ == '__main__':
     rnd_dict = get_random_dict(5)
     import json
