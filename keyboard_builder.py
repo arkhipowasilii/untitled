@@ -1,38 +1,40 @@
 from math import ceil
+from typing import Callable, Any, Tuple, List, Optional
 
-from telegram import InlineKeyboardButton as Button
-
-from bot import parting
-from node import Node
-from tree import Tree
+from telegram import InlineKeyboardButton as Button, InlineKeyboardMarkup
 
 
 class KeyboardBuilder:
+    # ToDo Перенести логику раскидывания кнопок по линиям на `button`
     def __init__(self):
-        pass
+        self._preprocess = lambda data: (str(data), str(data), None)
+        self._inline_count = None
+        self._buttons: List[Button] = []
 
-    def element_in_line(self, elements: int) -> [[Button]]:
-        if self.callback_node is None:
-            return [[Button(text=str(self.tree.get(uid=1)), callback_data=str(1))]]
+    def set_preprocess(self, preprocess: Callable[[Any], Tuple[str, str, str]]):
+        self._preprocess = preprocess
+        return self
 
-        buttons = []
+    def elements_in_line(self, count: int) -> [[Button]]:
+        self._inline_count = count
+        return self
 
-        nodes = self.callback_node.children
+    def button(self, data: Any):
 
-        lines = [nodes[elements * line_number : elements * (line_number + 1)]
-            for line_number in range(len(nodes) // elements + 1)]
+        data, callback, url = self._preprocess(data)
+        self._buttons.append(Button(text=data, callback_data=callback, url=url))
 
-        for line in lines:
-            buttons.append(list(map(self.button, line)))
+        return self
 
-        buttons.append([Button(text='назад', callback_data=str(self.tree.find_parent(self.callback_num)))])
+    def line(self) -> 'KeyboardBuilder':
+        raise NotImplementedError()
 
-        return buttons
+    def back(self, callback_data: str):
+        self._buttons.append(Button(text="<-", callback_data=callback_data))
+        return self
 
-    @staticmethod
-    def button(node: Node, parent_uid: int):
-        if node.url is not None:
-            return Button(text=str(node), url=node.url, callback_data=str(parent_uid))
+    def get(self) -> InlineKeyboardMarkup:
+        buttons = [self._buttons[self._inline_count * line : self._inline_count * (line + 1)]
+            for line in range(ceil(len(self._buttons) // self._inline_count))]
 
-        return Button(text=str(node), callback_data=str(node._uid))
-
+        return InlineKeyboardMarkup(buttons)

@@ -35,18 +35,20 @@ class MyBot:
 
     def callback_query_callback(self, bot: Bot, update: Update):
         # ToDo Если элементов в строке больше 4-х, делать две строки итд
-        current_node: int = int(update.callback_query.data)
+        node_uid: int = int(update.callback_query.data)
 
         # kb = KeyboardBuilder(callback, self.tree).element_in_line(4)
-        kb = KeyboardBuilder()
-        node = self.tree.get(current_node)
+        kb = KeyboardBuilder().set_preprocess(lambda node: (str(node), node.uid, node.url)).elements_in_line(4)
 
+        for child in self.tree.get(node_uid).children:
+            kb.button(child)
 
-        markup = Markup(kb)
+        kb.back(node_uid)
+
         message = update.effective_message
         message_id = update.effective_message.message_id
         telegram_id = update.effective_chat.id
-        bot.edit_message_reply_markup(reply_markup=markup, message_id=message_id, chat_id=telegram_id)
+        bot.edit_message_reply_markup(reply_markup=kb.get(), message_id=message_id, chat_id=telegram_id)
 
     def start_bot(self):
         self.updater.start_polling()

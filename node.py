@@ -23,6 +23,10 @@ class Node:
     def is_leaf(self) -> bool:
         return len(self.children) == 0
 
+    @property
+    def is_url(self) -> bool:
+        return self.url is not None
+
     def __repr__(self):
         return f"{self._uid}::{self.name}::{self.url}::{','.join(tuple(str(child.uid) for child in self.children))}"
 

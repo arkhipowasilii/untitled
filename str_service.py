@@ -1,4 +1,5 @@
 import logging
+from collections import namedtuple
 from typing import Union, List, Optional, Dict
 
 from node import Node
@@ -59,6 +60,8 @@ def get_distance(left_word: str, right_word: str) -> int:
     return _matrix[-1][-1]
 
 
+DifferencePoint = namedtuple("Diff", ("word", "distance"))
+
 def _get_difference_point(data: Union[Node, str], request: str) -> Dict[str, Union[str, int]]:
     '''
 
@@ -68,14 +71,15 @@ def _get_difference_point(data: Union[Node, str], request: str) -> Dict[str, Uni
     '''
     # ToDo 2 Normal intersection
     data = str(data)
-    min_dis = result = len(data)
+    min_dis = len(data)
+    result = None
 
     for request_word in request.split(' '):
-        request_distance = get_distance(request_word, data)
-        if request_distance < min_dis:
-            min_dis, result = request_distance, request_word
+        distance = get_distance(request_word, data)
+        if distance < min_dis:
+            min_dis, result = distance, request_word
 
-    return {"word": result, "distance": min_dis}
+    return DifferencePoint(word=result, distance=min_dis)
 
 
 def _get_intersection(right_word: str, left_word: str):

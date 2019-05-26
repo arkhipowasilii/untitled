@@ -1,3 +1,5 @@
+import string
+
 from tree import Tree
 from str_service import get_distance
 from node import Node
@@ -50,4 +52,38 @@ def test_find():
 
     rnd_path = (get_random_path(rnd_tree.root))
     request = get_mixed_request(rnd_path)
-    rnd_tree.find(request)
+    result = rnd_tree.find(request)
+    # ToDo Fix error with depth level (at now: -1 level)
+    pass
+
+def test_sorting_nodes():
+    dict_depth = 3
+
+    tree = Tree(get_random_dict(dict_depth))
+
+
+    for child in tree.root.children:
+        child.name = f"data{''.join(tuple(random.choices(string.ascii_lowercase, k=10)))}"
+
+    nodes = tree._sorting_children(tree.root, "data")
+    assert len(nodes) == len(tree.root.children)
+    for node, weight in nodes:
+        assert weight.distance == 10
+        assert weight.word == "data"
+
+def test_sorting_nodes_2():
+    dict_depth = 3
+
+    tree = Tree(get_random_dict(dict_depth))
+
+    request = ' '.join([random.choice(tree.root.children).name, random.choice(tree.root.children).name] + \
+              list(''.join(random.choices(string.ascii_lowercase, k=10)) for _ in range(10)))
+
+    nodes = tree._sorting_children(tree.root, request)
+    # ToDo add asserts
+
+def test_find_private():
+    tree = Tree(get_random_dict(2))
+    node = random.choice(tree.root.children)
+    result = tree._find(tree.root, node.name, 0)
+    pass
