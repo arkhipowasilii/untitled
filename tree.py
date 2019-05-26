@@ -1,11 +1,13 @@
 import logging
+from collections import namedtuple
 from typing import Tuple, Union, List
 import json
 from node import Node
 
-
 # ToDo Homework make tests for `Tree` class.
 from str_service import _get_difference, _get_difference_point
+
+Pair = namedtuple("Pair", ("node", "weight"))
 
 
 class Tree:
@@ -62,19 +64,24 @@ class Tree:
         return uid1
 
     def find(self, request: str) -> Union[Node, Tuple[Node], None]:
-        paths = self._find(self.root, request)
+        raise NotImplementedError
 
-        if any(weight == 0 for weight, _ in paths):
-            return paths[-1][1]
+    def _sorting_children(self, node: Node, request: str) -> Tuple[Pair]:
 
-        path = min(paths, key=lambda weight_path: weight_path[0])
-        return path[-1][1]
+        node_weights: Tuple[Pair] = tuple(Pair(node=child,
+                                               weight=_get_difference_point(child, request))
+                                           for child in node.children)
+
+        node_weights = tuple(filter(lambda data: data.weight.word != None, node_weights))
+        nodes: Tuple[Pair] = sorted(node_weights, key=lambda node_data: node_data.weight.distance)
+        return nodes
 
     def _find(self, node: Node, request: str, weight: int = None) -> List[Tuple[int, Node]]:
         """
         TODO FIXME
         Возвращает узел, если поиск успешен
         Возвращает все не отверженные пути, если поиск не успешен и взвешивает их
+
         :param node:
         :param request:
         :return:
@@ -83,30 +90,26 @@ class Tree:
         weight = weight or 0
 
         if len(request) == 0:
-            return [(0, node), ]
+            return [(0, (node,)), ]
 
         if node.is_leaf:
             # ToDo Add request
-            return [(len(request.split(' ')), node), ]
-
-        node_weights: Tuple[Tuple[Node, dict]] = tuple((child, _get_difference_point(child, request))
-                                                       for child in node.children)
-
-        logging.debug(f"node_weights --> {node_weights}")
-
-        nodes: Tuple[Tuple[Node, dict]] = sorted(node_weights,
-                                                 key=lambda node_data: node_data[1]['distance'])
-
-        logging.debug(f"nodes --> {nodes}")
+            return [(len(request.split(' ')), (node,)), ]
 
         def _find_path(child: Node, intersection: str, weight_child: int) -> tuple:
-            return child, \
-                   self._find(child, _get_difference(request, intersection), weight + weight_child)
+            path = self._find(child, _get_difference(request, intersection), weight + weight_child)
+            return child, path
 
         current_paths = []
-        for child, paths in (_find_path(node, data['word'], data['distance']) for node, data in nodes):
+
+        tmp = (_find_path(node, data.word, data.distance) for node, data in self._sorting_children(node, request))
+
+        # FixMe Only debug
+        tmp = tuple(tmp)
+
+        for child, paths in tmp:
             for path_weight, path in paths:
-                if len(path) != 1:
+                if len(path) != 1 :
                     path.append(child)
 
                 current_paths.append((path_weight, path))
