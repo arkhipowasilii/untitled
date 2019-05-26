@@ -35,9 +35,12 @@ class MyBot:
 
     def callback_query_callback(self, bot: Bot, update: Update):
         # ToDo Если элементов в строке больше 4-х, делать две строки итд
-        callback = int(update.callback_query.data)
+        current_node: int = int(update.callback_query.data)
 
-        kb = KeyboardBuilder(callback, self.tree).element_in_line(4)
+        # kb = KeyboardBuilder(callback, self.tree).element_in_line(4)
+        kb = KeyboardBuilder()
+        node = self.tree.get(current_node)
+
 
         markup = Markup(kb)
         message = update.effective_message
@@ -50,15 +53,6 @@ class MyBot:
 
     def tree_redo(self, node: Node = None):
         pass
-
-
-def parting(lst: List, part_len: int, num_element: int) -> List:
-    result_lst = [lst[part_len * k:part_len * (k + 1)] for k in range(len(lst) // part_len + 1)]
-
-    if len(result_lst[-1]) == 0:
-        del result_lst[-1]
-
-    return result_lst[num_element]
 
 
 if __name__ == '__main__':
