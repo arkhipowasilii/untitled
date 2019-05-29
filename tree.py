@@ -64,7 +64,11 @@ class Tree:
         return uid1
 
     def find(self, request: str) -> Union[Node, Tuple[Node], None]:
-        raise NotImplementedError
+        paths = self._find(self.root, request)
+        if any(weight == 0 for weight, _ in paths):
+            return paths[-1][1]
+        path = min(paths, key=lambda weight_path: weight_path[0])
+        return path[-1][0]
 
     def _sorting_children(self, node: Node, request: str) -> Tuple[Pair]:
 
@@ -97,7 +101,10 @@ class Tree:
             return [(len(request.split(' ')), (node,)), ]
 
         def _find_path(child: Node, intersection: str, weight_child: int) -> tuple:
-            path = self._find(child, _get_difference(request, intersection), weight + weight_child)
+            difference = _get_difference(request, intersection)
+            if difference == '':
+                return child, [(weight_child, (child,)), ]
+            path = self._find(child, difference, weight + weight_child)
             return child, path
 
         current_paths = []
