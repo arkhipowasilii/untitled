@@ -20,13 +20,13 @@ class KeyboardBuilder:
         return self
 
     def button(self, data: Any):
-
         data, callback, url = self._preprocess(data)
         self._buttons.append(Button(text=data, callback_data=callback, url=url))
 
         return self
 
     def line(self) -> 'KeyboardBuilder':
+        # ToDo Homework
         raise NotImplementedError()
 
     def back(self, callback_data: str):
@@ -34,7 +34,7 @@ class KeyboardBuilder:
         return self
 
     def get(self) -> InlineKeyboardMarkup:
-        buttons = [self._buttons[self._inline_count * line : self._inline_count * (line + 1)]
-            for line in range(ceil(len(self._buttons) // self._inline_count))]
+        buttons = [self._buttons[self._inline_count * line: self._inline_count * (line + 1)]
+                   for line in range(ceil(len(self._buttons) // self._inline_count))]
 
         return InlineKeyboardMarkup(buttons)

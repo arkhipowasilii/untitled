@@ -7,7 +7,7 @@ def get_random_string() -> str:
 
 
 def get_random_level() -> int:
-    return random.randint(500, 1000)
+    return random.randint(20, 21)
 
 
 def generate_random_key_dict() -> dict:

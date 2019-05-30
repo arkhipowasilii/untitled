@@ -7,7 +7,19 @@ from node import Node
 # ToDo Homework make tests for `Tree` class.
 from str_service import _get_difference, _get_difference_point
 
-Pair = namedtuple("Pair", ("node", "weight"))
+
+class Path:
+    def __init__(self, node: Node = None, weight: int = None):
+        self.nodes = [node, ] if node is not None else list()
+        self.weight = weight or 0
+
+    def __add__(self, other: Union['Path', Tuple[Node, int]]) -> 'Path':
+        if isinstance(other, Path):
+            pass
+
+        if isinstance(other, tuple):
+            pass
+
 
 
 class Tree:
@@ -70,17 +82,20 @@ class Tree:
         path = min(paths, key=lambda weight_path: weight_path[0])
         return path[-1][0]
 
-    def _sorting_children(self, node: Node, request: str) -> Tuple[Pair]:
+    @classmethod
+    def _sorting_children(cls, node: Node, request: str) -> Tuple[Tuple[Node, int]]:
+
+        Pair = Tuple[Node, int]
 
         node_weights: Tuple[Pair] = tuple(Pair(node=child,
                                                weight=_get_difference_point(child, request))
-                                           for child in node.children)
+                                          for child in node.children)
 
         node_weights = tuple(filter(lambda data: data.weight.word != None, node_weights))
         nodes: Tuple[Pair] = sorted(node_weights, key=lambda node_data: node_data.weight.distance)
         return nodes
 
-    def _find(self, node: Node, request: str, weight: int = None) -> List[Tuple[int, Node]]:
+    def _find(self, request: str, path: Path = None) -> Union[Path, List[Path]]:
         """
         TODO FIXME
         Возвращает узел, если поиск успешен
@@ -91,40 +106,27 @@ class Tree:
         :return:
         """
 
-        weight = weight or 0
+        if path is None:
+            path = Path(self.root)
 
-        if len(request) == 0:
-            return [(0, (node,)), ]
+        node = path.nodes[-1]
 
-        if node.is_leaf:
-            # ToDo Add request
-            return [(len(request.split(' ')), (node,)), ]
+        if request == '' or node.is_leaf:
+            return path
 
-        def _find_path(child: Node, intersection: str, weight_child: int) -> tuple:
-            difference = _get_difference(request, intersection)
-            if difference == '':
-                return child, [(weight_child, (child,)), ]
-            path = self._find(child, difference, weight + weight_child)
-            return child, path
+        paths = list()
+        for child, dif_point in self._sorting_children(node, request):
+            # ToDo Realize this part of logic
+            # Вызов поиска для child с "порезанным" request
+            # Матчинг вывода find для child
+            pass
 
-        current_paths = []
+        # ToDo проверка на то, нет ли среди путей - корректного (`min(weight)`)
 
-        tmp = (_find_path(node, data.word, data.distance) for node, data in self._sorting_children(node, request))
+        if len(paths) == 1:
+            return paths[0]
 
-        # FixMe Only debug
-        tmp = tuple(tmp)
-
-        for child, paths in tmp:
-            for path_weight, path in paths:
-                if len(path) != 1 :
-                    path.append(child)
-
-                current_paths.append((path_weight, path))
-
-        if any(pair[0] == 0 for pair in current_paths):
-            current_paths = list(filter(lambda pair: pair[0] == 0, current_paths))
-
-        return current_paths
+        return paths
 
 
 if __name__ == '__main__':

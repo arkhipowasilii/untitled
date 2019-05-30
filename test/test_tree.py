@@ -87,10 +87,21 @@ def test_find_private():
     tree = Tree(get_random_dict(2))
     node_request = random.choice(tree.root.children)
     result = tree._find(tree.root, node_request.name, 0)
+
     if len(result) != 1:
-        wrong_result = [node[1][0].name for node in result if get_distance(node_request.name, node[1][0].name) > 2]
+        wrong_result = [path[0].name for _, path in result if get_distance(node_request.name, path[0].name) > 2]
         with open("wrong_tree_find_results.py", "a") as current_file:
             current_file.write(f"dict_level_1 = " + "{" + f"node_name:'https://www.google.ru' for node_name in {wrong_result}" + "}\n"
                                f"tree = Tree(dict.fromkeys(['root'], dict_level_1))\n"
                                f"print(tree._find(tree.root, '{node_request}', 0))\n")
-            current_file.close()
+
+def test_find_final():
+    tree = Tree(get_random_dict(3))
+    node_request: Node = random.choice(tree.root.children)
+    node_request: Node = random.choice(node_request.children)
+
+    result = tree._find(tree.root, node_request.name)
+
+    pass
+
+

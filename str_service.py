@@ -38,10 +38,10 @@ def get_distance(left_word: str, right_word: str) -> int:
         left_word, right_word = right_word, left_word
         len_left, len_right = len_right, len_left
 
-    _matrix: List[List[Optional[int]]] = list(list(0 for _ in range(len_left+1)) for _ in range(len_right+1))
+    _matrix: List[List[Optional[int]]] = list(list(0 for _ in range(len_left + 1)) for _ in range(len_right + 1))
 
-    for right_index in range(1, len_right+1):
-        for left_index in range(1, len_left+1):
+    for right_index in range(1, len_right + 1):
+        for left_index in range(1, len_left + 1):
 
             if right_index == 1:
                 _matrix[0][left_index] = left_index
@@ -49,10 +49,10 @@ def get_distance(left_word: str, right_word: str) -> int:
             if left_index == 1:
                 _matrix[right_index][0] = right_index
 
-            add = _matrix[right_index][left_index - 1]+1
-            delete = _matrix[right_index - 1][left_index]+1
+            add = _matrix[right_index][left_index - 1] + 1
+            delete = _matrix[right_index - 1][left_index] + 1
             change = _matrix[right_index - 1][left_index - 1]
-            if right_word[right_index-1] != left_word[left_index-1]:
+            if right_word[right_index - 1] != left_word[left_index - 1]:
                 change += 1
 
             _matrix[right_index][left_index] = min(add, delete, change)
@@ -62,14 +62,15 @@ def get_distance(left_word: str, right_word: str) -> int:
 
 DifferencePoint = namedtuple("Diff", ("word", "distance"))
 
-def _get_difference_point(data: Union[Node, str], request: str) -> Dict[str, Union[str, int]]:
-    '''
+
+def _get_difference_point(data: Union[Node, str], request: str) -> DifferencePoint:
+    """
 
     :param data:
     :param request:
     :return:
-    '''
-    # ToDo 2 Normal intersection
+    """
+
     data = str(data)
     min_dis = len(data)
     result = None
