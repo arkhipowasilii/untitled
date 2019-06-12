@@ -9,7 +9,7 @@ class KeyboardBuilder:
     def __init__(self):
         self._preprocess = lambda data: (str(data), str(data), None)
         self._inline_count = None
-        self._buttons: List[Button] = []
+        self._buttons: List[List[Button]] = [[]]
 
     def set_preprocess(self, preprocess: Callable[[Any], Tuple[str, str, str]]):
         self._preprocess = preprocess
@@ -21,8 +21,19 @@ class KeyboardBuilder:
 
     def button(self, data: Any):
         data, callback, url = self._preprocess(data)
-        self._buttons.append(Button(text=data, callback_data=callback, url=url))
+        current_button = Button(text=data, callback_data=callback, url=url)
 
+        for index in range(len(self._buttons)):
+            if len(self._buttons[index]) >= self._inline_count:
+                try:
+                    if len(self._buttons[index+1]) >= self._inline_count:
+                        continue
+                    else:
+                        self._buttons[index+1].append(current_button)
+                except:
+                    self._buttons[index+1] = [current_button]
+            else:
+                self._buttons[index].append(current_button)
         return self
 
     def line(self) -> 'KeyboardBuilder':

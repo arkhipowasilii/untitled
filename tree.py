@@ -15,12 +15,15 @@ class Path:
 
     def __add__(self, other: Union['Path', Tuple[Node, int]]) -> 'Path':
         if isinstance(other, Path):
-            pass
+            for other_node in other.nodes:
+                self.nodes.append(other_node)
+            self.weight += other.weight
 
-        if isinstance(other, tuple):
-            pass
+        elif isinstance(other, tuple):
+            self.nodes += [other[0]]
+            self.weight += other[1]
 
-
+        return self
 
 class Tree:
     def __init__(self, tree_dict: dict):
@@ -76,7 +79,7 @@ class Tree:
         return uid1
 
     def find(self, request: str) -> Union[Node, Tuple[Node], None]:
-        paths = self._find(self.root, request)
+        paths = self._find(request)
         if any(weight == 0 for weight, _ in paths):
             return paths[-1][1]
         path = min(paths, key=lambda weight_path: weight_path[0])
@@ -116,10 +119,24 @@ class Tree:
 
         paths = list()
         for child, dif_point in self._sorting_children(node, request):
+            updated_request = _get_difference(request, child.name)
+            path += self._find(updated_request, path)
+            paths.append(path)
             # ToDo Realize this part of logic
             # Вызов поиска для child с "порезанным" request
             # Матчинг вывода find для child
             pass
+
+        min_weight_path = None
+        for current_path in paths:
+            if min_weight_path is None:
+                min_weight_path = current_path
+            else:
+                if min_weight_path.weight > current_path.weight:
+                    min_weight_path = current_path
+
+        if min_weight_path.weight < len(min_weight_path.nodes)*2:
+            return min_weight_path
 
         # ToDo проверка на то, нет ли среди путей - корректного (`min(weight)`)
 
@@ -132,8 +149,8 @@ class Tree:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    with open("menu.json", "r", encoding="utf-8") as write_file:
+    with open("menu_test.json", "r", encoding="utf-8") as write_file:
         menu_dict = json.load(write_file)
 
     example_tree = Tree(menu_dict)
-    print(example_tree.find("Зонтики"))
+    print(example_tree.find("london camps"))
