@@ -30,7 +30,7 @@ class KeyboardBuilder:
                         continue
                     else:
                         self._buttons[index+1].append(current_button)
-                except:
+                except: # ToDo add exception detail
                     self._buttons[index+1] = [current_button]
             else:
                 self._buttons[index].append(current_button)

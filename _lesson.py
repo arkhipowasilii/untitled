@@ -1,83 +1,96 @@
+from typing import List
+
+
 class BigUInt:
-    def __init__(self, number: str = None, all_numbers: list = None):
-        if all_numbers is not None:
-            self.numbers = all_numbers
-            number = ''
-            for num in all_numbers:
-                number += str(num)
-                self.number = number[::-1]
+    def __init__(self, number: str):
+        self.numbers: List[int] = []
+        for num in number:
+            assert num.isdecimal()
+            self.numbers.append(int(num))
 
-        else:
-            self.number = number
-            self.numbers = []
-            for num in number[::-1]:
-                assert num.isdecimal()
-                self.numbers.append(int(num))
+    def __str__(self):
+        return ''.join(tuple(map(str, self.numbers)))
 
-    def __lt__(self, other):
-        # ToDo Homework
-        raise NotImplementedError()
+    @classmethod
+    def _create(cls, numbers: List[int]):
+        assert all(num < 10 for num in numbers)
+
+        result = cls('')
+        result.numbers = list(numbers)
+        return result
 
     def __gt__(self, other):
-        # ToDo homework
-        raise NotImplementedError()
+        left = self.numbers
+        right = other.numbers
 
-    def __add__(self, other):
-        len_self = len(self.numbers)
-        len_other = len(other.numbers)
-        if len_other > len_self:
-            self.numbers, other.numbers = other.numbers, self.numbers
-            len_self, len_other = len_other, len_self
+        if len(self.numbers) > len(other.numbers):
+            return True
+        elif len(self.numbers) < len(other.numbers):
+            return False
 
-        result_numbers = [0 for _ in range(len_self+1)]
+        for index, num_self in enumerate(left):
+            if num_self > right[index]:
+                return True
+            elif num_self < right[index]:
+                return False
+        return False
 
-        for index in range(len_self):
-            num_self = self.numbers[index]
-            current_res_num = result_numbers[index]
-            if index < len_other:
-                num_other = other.numbers[index]
-                current_num = num_self + num_other + current_res_num
-                if current_num >= 10:
-                    result_numbers[index] = current_num - 10
-                    result_numbers[index+1] += 1
-                else:
-                    result_numbers[index] = current_num
+    def __lt__(self, other):
+        return other.__gt__(self)
 
+    def __add__(self, other: 'BigUInt'):
+
+        left = self.numbers[::-1]
+        right = other.numbers[::-1]
+
+        if other > self:
+            left, right = right, left
+
+        result = left
+        if left[len(right)-1] + right[-1] >= 10:
+            result.append(0)
+
+        for index, num_right in enumerate(right):
+
+            if result[index] == 10:
+                result[index] = 0
+                result[index + 1] += 1
+
+            current_num = result[index] + num_right
+
+            if current_num < 10:
+                result[index] = current_num
             else:
-                current_num = current_res_num + num_self
-                if current_num == 10:
-                    result_numbers[index+1] = 1
-                    result_numbers[index] = 0
-                else:
-                    result_numbers[index] = current_num
+                result[index+1] += 1
+                result[index] = current_num - 10
 
-        if result_numbers[-1] == 0:
-            del result_numbers[-1]
-        return BigUInt(all_numbers=result_numbers)
+
+        print(result)
+        return BigUInt._create(result[::-1])
 
     def __sub__(self, other):
-        len_self = len(self.numbers)
-        len_other = len(other.numbers)
+        right = other.numbers[::-1]
+        result = self.numbers[::-1]
 
-        result_numbers = [0 for _ in range(len_self+1)]
+        for index, num_right in enumerate(right):
+            current_num = result[index] - num_right
 
-        for index in range(len_self):
-            num_self = self.numbers[index]
-            num_other = other.numbers[index]
-            current_num = num_self - num_other + result_numbers[index]
-            result_numbers[index+1] = -1
             if current_num >= 0:
-                result_numbers[index] = current_num
+                result[index] = current_num
             else:
-                result_numbers[index] = 10 + current_num
-                result_numbers[index+1] = -1
+                result[index+1] = result[index+1]-1
+                result[index] = 10 + current_num
 
-        return BigUInt(all_numbers=result_numbers)
+        while result[-1] == 0:
+            del result[-1]
+        return BigUInt._create(result[::-1])
+
+
 def bar(arg1, arg2, arg3):
-    return arg1 - arg2
+    return arg1 + arg2
 
 
 if __name__ == '__main__':
-    a, b, c = BigUInt("103"), BigUInt("101"), BigUInt("100")
+    a, b, c = BigUInt("99999"), BigUInt("4"), BigUInt("100")
 
-    print(bar(a, b, c).number)
+    print(bar(a, b, c))
